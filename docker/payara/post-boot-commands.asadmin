@@ -1,0 +1,18 @@
+# Payara Post-Boot Configuration for MDB + External RA SSCCE
+
+# 1. Deploy IBM MQ Resource Adapter (MUST be before WAR)
+deploy /tmp/wmq.jakarta.jmsra.rar
+
+# 2. Create Connector Connection Pool
+# CRITICAL: Use jakarta.jms.ConnectionFactory as connectiondefinition (NOT implementation class)
+create-connector-connection-pool --raname=wmq.jakarta.jmsra --connectiondefinition=jakarta.jms.ConnectionFactory --property=hostName=${ENV=MQ_HOST}:port=${ENV=MQ_PORT}:queueManager=${ENV=MQ_QMGR}:channel=${ENV=MQ_CHANNEL}:transportType=CLIENT MQConnectionPool
+
+# 3. Create Connector Resource
+create-connector-resource --poolname=MQConnectionPool jms/MQConnectionFactory
+
+# 4. Create Queue Admin Object
+# CRITICAL: Use jakarta.jms.Queue as restype (NOT implementation class)
+create-admin-object --raname=wmq.jakarta.jmsra --restype=jakarta.jms.Queue --property=baseQueueName=DEV.QUEUE.1:baseQueueManagerName=${ENV=MQ_QMGR} jms/DEV.QUEUE.1
+
+# 5. Deploy Backend WAR (after RA and resources)
+deploy /tmp/test-mdb.war
