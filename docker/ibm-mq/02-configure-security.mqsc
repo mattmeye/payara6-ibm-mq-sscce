@@ -1,0 +1,20 @@
+* IBM MQ Security Configuration for SSCCE
+* WARNING: This disables authentication - FOR DEVELOPMENT ONLY!
+
+* Disable channel authentication
+ALTER QMGR CHLAUTH(DISABLED)
+
+* Disable connection authentication
+ALTER QMGR CONNAUTH(' ')
+REFRESH SECURITY TYPE(CONNAUTH)
+
+* Create server connection channel with mqm user context
+DEFINE CHANNEL('DEV.APP.SVRCONN') CHLTYPE(SVRCONN) MCAUSER('mqm') REPLACE
+
+* Grant mqm user full permissions
+SET AUTHREC OBJTYPE(QMGR) PRINCIPAL('mqm') AUTHADD(CONNECT,INQ,ALLADM)
+SET AUTHREC PROFILE('DEV.**') OBJTYPE(QUEUE) PRINCIPAL('mqm') AUTHADD(ALL)
+
+* Display security configuration
+DISPLAY QMGR CHLAUTH CONNAUTH
+DISPLAY CHANNEL('DEV.APP.SVRCONN') ALL

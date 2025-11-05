@@ -1,18 +1,14 @@
-version: '3.8'
-
 services:
   # IBM MQ Server
   ibm-mq:
-    image: icr.io/ibm-messaging/mq:9.4.0.0-r1
+    build:
+      context: ./docker/ibm-mq
+      dockerfile: Dockerfile
     container_name: ibm-mq
     hostname: ibm-mq
     ports:
-      - "1414:1414"
-      - "9443:9443"
-    environment:
-      LICENSE: accept
-      MQ_QMGR_NAME: QM1
-      MQ_APP_PASSWORD: passw0rd
+      - "1415:1414"
+      - "9444:9443"
     volumes:
       - ibm_mq_data:/mnt/mqm
     healthcheck:
@@ -27,8 +23,8 @@ services:
     container_name: payara
     hostname: payara
     ports:
-      - "8080:8080"
-      - "4848:4848"
+      - "8081:8080"
+      - "4849:4848"
     environment:
       # IBM MQ Connection
       MQ_HOST: ibm-mq
@@ -43,7 +39,7 @@ services:
       ibm-mq:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4848"]
+      test: ["CMD", "/opt/payara/appserver/bin/asadmin", "version"]
       interval: 10s
       timeout: 5s
       retries: 5

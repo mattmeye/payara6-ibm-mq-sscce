@@ -9,8 +9,7 @@ import jakarta.jms.TextMessage;
 /**
  * Minimal MDB for SSCCE reproduction.
  *
- * Expected: Should be activated and registered during deployment.
- * Actual: Completely ignored (silent failure).
+ * Fixed: Added connectionFactoryLookup to use configured ConnectionFactory.
  */
 @MessageDriven(
     name = "TestMessageBean",
@@ -22,6 +21,10 @@ import jakarta.jms.TextMessage;
         @ActivationConfigProperty(
             propertyName = "destination",
             propertyValue = "DEV.QUEUE.1"
+        ),
+        @ActivationConfigProperty(
+            propertyName = "connectionFactoryLookup",
+            propertyValue = "jms/MQConnectionFactory"
         )
     }
 )

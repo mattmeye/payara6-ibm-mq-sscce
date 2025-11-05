@@ -1,0 +1,22 @@
+* IBM MQ Queue Configuration for SSCCE
+* This script creates queues automatically during QM startup
+
+* Define main application queue
+DEFINE QLOCAL('DEV.QUEUE.1') REPLACE +
+  DESCR('Test queue for MDB consumption') +
+  DEFPSIST(YES) +
+  MAXDEPTH(5000) +
+  MAXMSGL(4194304)
+
+* Define dead letter queue
+DEFINE QLOCAL('DEV.DEAD.LETTER.QUEUE') REPLACE +
+  DESCR('Dead letter queue') +
+  DEFPSIST(YES) +
+  MAXDEPTH(5000)
+
+* Set dead letter queue for queue manager
+ALTER QMGR DEADQ('DEV.DEAD.LETTER.QUEUE')
+
+* Display queue configuration
+DISPLAY QLOCAL('DEV.QUEUE.1')
+DISPLAY QLOCAL('DEV.DEAD.LETTER.QUEUE')

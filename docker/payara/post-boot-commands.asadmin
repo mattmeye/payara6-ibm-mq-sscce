@@ -5,7 +5,8 @@ deploy /tmp/wmq.jakarta.jmsra.rar
 
 # 2. Create Connector Connection Pool
 # CRITICAL: Use jakarta.jms.ConnectionFactory as connectiondefinition (NOT implementation class)
-create-connector-connection-pool --raname=wmq.jakarta.jmsra --connectiondefinition=jakarta.jms.ConnectionFactory --property=hostName=${ENV=MQ_HOST}:port=${ENV=MQ_PORT}:queueManager=${ENV=MQ_QMGR}:channel=${ENV=MQ_CHANNEL}:transportType=CLIENT MQConnectionPool
+# userName=mqm matches MCAUSER on channel
+create-connector-connection-pool --raname=wmq.jakarta.jmsra --connectiondefinition=jakarta.jms.ConnectionFactory --property=hostName=${ENV=MQ_HOST}:port=${ENV=MQ_PORT}:queueManager=${ENV=MQ_QMGR}:channel=${ENV=MQ_CHANNEL}:transportType=CLIENT:userName=mqm MQConnectionPool
 
 # 3. Create Connector Resource
 create-connector-resource --poolname=MQConnectionPool jms/MQConnectionFactory
