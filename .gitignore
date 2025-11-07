@@ -16,3 +16,8 @@ build/
 
 # Docker volumes
 docker/payara/wmq.jakarta.jmsra.rar
+
+# SSL/TLS Certificates (generated, not committed)
+docker/certs/ca/
+docker/certs/mq/
+docker/certs/payara/

@@ -1,0 +1,10 @@
+* IBM MQ SSL/TLS Inline Configuration
+* This script sets up SSL using certificates mounted from the host
+* The keystore setup will be done via a separate initialization script
+
+* Note: The actual keystore creation happens in a post-start script
+* because MQSC cannot create CMS keystores directly
+* This file ensures proper command execution ordering
+
+* Display current SSL configuration (will be empty initially)
+DISPLAY QMGR SSLKEYR

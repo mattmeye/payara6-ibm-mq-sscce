@@ -6,7 +6,7 @@
     <enterprise-beans>
         <message-driven>
             <ejb-name>TestMessageBean</ejb-name>
-            <ejb-class>test.TestMessageBean</ejb-class>
+            <ejb-class>com.example.mq.mdb.TestMessageBean</ejb-class>
             <messaging-type>jakarta.jms.MessageListener</messaging-type>
             <transaction-type>Container</transaction-type>
             <activation-config>

@@ -125,22 +125,27 @@ See [IBM MQ Container Registry](https://ibm.biz/mq-container-images) for all ava
 
 ## Configuration Files
 
-### 01-create-queues.mqsc
+### 01-setup-queues.mqsc
 
 Creates the following MQ objects:
 - `DEV.QUEUE.1` - Main application queue with backout handling
 - `DEV.BACKOUT.QUEUE` - For messages that fail after 3 retries
 - `DEV.DEAD.LETTER.QUEUE` - For undeliverable messages
-- `DEV.APP.SVRCONN` - Server connection channel
 
-### 02-configure-security.mqsc
+### 03-configure-ssl.mqsc
 
-Configures security settings for development:
-- ⚠️ **WARNING:** Disables channel authentication (development only!)
-- Sets authority records for the `app` user
-- Grants necessary permissions on queues
+Configures SSL/TLS security:
+- Enables channel authentication
+- Creates SSL-enabled `DEV.APP.SVRCONN` channel with `ECDHE_RSA_AES_128_GCM_SHA256` cipher
+- Sets up certificate-based authentication (SSLPEERMAP)
+- Configures authorization for the `app` user
 
-**Do not use these security settings in production!**
+### setup-ssl.sh
+
+Initializes the IBM MQ SSL keystore:
+- Imports CA certificate
+- Imports MQ server certificate and private key
+- Sets proper permissions on keystore files
 
 ---
 

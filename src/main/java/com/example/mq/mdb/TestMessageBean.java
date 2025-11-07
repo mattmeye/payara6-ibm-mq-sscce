@@ -1,4 +1,4 @@
-package test;
+package com.example.mq.mdb;
 
 import jakarta.ejb.ActivationConfigProperty;
 import jakarta.ejb.MessageDriven;

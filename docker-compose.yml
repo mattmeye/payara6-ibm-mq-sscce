@@ -1,5 +1,5 @@
 services:
-  # IBM MQ Server
+  # IBM MQ Server with SSL/TLS
   ibm-mq:
     build:
       context: ./docker/ibm-mq
@@ -7,34 +7,43 @@ services:
     container_name: ibm-mq
     hostname: ibm-mq
     ports:
-      - "1415:1414"
-      - "9444:9443"
+      - "1415:1414"  # MQ Listener (SSL/TLS only)
+      - "9444:9443"  # MQ Web Console (HTTPS)
     volumes:
       - ibm_mq_data:/mnt/mqm
+      - ./docker/certs:/mnt/certs:ro  # Mount certificates for SSL setup
+    environment:
+      - MQ_QMGR_NAME=QM1
     healthcheck:
       test: ["CMD", "/opt/mqm/bin/dspmq"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Payara Server
+  # Payara Server with SSL/TLS Client
   payara:
     image: payara/server-full:6.2024.10-jdk21
     container_name: payara
     hostname: payara
     ports:
-      - "8081:8080"
-      - "4849:4848"
+      - "8081:8080"  # Application HTTP
+      - "4849:4848"  # Admin Console
     environment:
-      # IBM MQ Connection
+      # IBM MQ Connection (SSL/TLS)
       MQ_HOST: ibm-mq
       MQ_PORT: 1414
       MQ_QMGR: QM1
       MQ_CHANNEL: DEV.APP.SVRCONN
+      # IBM MQ Client Configuration with Custom SSLSocketFactory
+      # The custom factory reads truststore configuration from these properties
+      JAVA_TOOL_OPTIONS: "-Dcom.ibm.mq.cfg.useIBMCipherMappings=false -Dmq.ssl.trustStore=/opt/payara/certs/payara/payara-truststore.p12 -Dmq.ssl.trustStorePassword=payara -Dmq.ssl.trustStoreType=PKCS12"
     volumes:
       - ./build/libs/test-mdb.war:/tmp/test-mdb.war:ro
       - ./docker/payara/wmq.jakarta.jmsra.rar:/tmp/wmq.jakarta.jmsra.rar:ro
+      - ./docker/payara/domain.xml:/opt/payara/appserver/glassfish/domains/domain1/config/domain.xml:ro
       - ./docker/payara/post-boot-commands.asadmin:/opt/payara/config/post-boot-commands.asadmin:ro
+      # Mount ALL certificates (ca, mq, payara)
+      - ./docker/certs:/opt/payara/certs:ro
     depends_on:
       ibm-mq:
         condition: service_healthy

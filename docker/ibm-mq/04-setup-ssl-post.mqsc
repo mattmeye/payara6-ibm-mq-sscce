@@ -1,0 +1,6 @@
+* SSL/TLS Post-Configuration
+* This script is executed after the queue manager is fully started
+* It triggers the SSL keystore setup
+
+* The setup-ssl.sh script will be executed externally
+* This is just a placeholder to ensure proper ordering
