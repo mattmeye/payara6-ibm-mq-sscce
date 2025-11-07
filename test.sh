@@ -1,11 +1,11 @@
 #!/bin/bash
 # Automated test script for Payara 6 + IBM MQ SSCCE
 # This script performs a complete test cycle:
-# 1. Generate certificates
-# 2. Download IBM MQ (if needed)
+# 1. Generate certificates (if needed)
+# 2. Check IBM MQ Docker image
 # 3. Clean up Docker containers and volumes
-# 4. Build and start containers
-# 5. Configure SSL in IBM MQ
+# 4. Build application
+# 5. Start containers (SSL auto-configured via IBM MQ PKI)
 # 6. Send test messages
 # 7. Verify MDB message processing
 
@@ -91,52 +91,8 @@ if [ $counter -ge $timeout ]; then
     exit 1
 fi
 
-# Step 7: Setup SSL keystores in IBM MQ
-print_info "Step 7: Setting up SSL keystores in IBM MQ..."
-docker exec ibm-mq /etc/mqm/setup-ssl.sh
-print_status "SSL keystores configured"
-
-# Wait for Queue Manager to be fully ready
-print_info "Waiting for Queue Manager to be fully ready (10 seconds)..."
-for i in {1..10}; do
-    echo -n "."
-    sleep 1
-done
-echo ""
-print_status "Queue Manager should be ready"
-
-# Step 8: Configure SSL in Queue Manager and Channel
-print_info "Step 8: Configuring SSL in Queue Manager and Channel..."
-
-# Create MQSC script file
-cat > /tmp/set-ssl.mqsc << 'EOF'
-ALTER QMGR SSLKEYR('/var/mqm/qmgrs/QM1/ssl/mq-server')
-ALTER CHANNEL('DEV.APP.SVRCONN') CHLTYPE(SVRCONN) SSLCIPH('ECDHE_RSA_AES_128_GCM_SHA256') SSLCAUTH(REQUIRED) MCAUSER('app')
-REFRESH SECURITY TYPE(SSL)
-EOF
-
-# Copy to container and execute
-docker cp /tmp/set-ssl.mqsc ibm-mq:/tmp/set-ssl.mqsc > /dev/null 2>&1
-docker exec ibm-mq bash -c "runmqsc QM1 < /tmp/set-ssl.mqsc" > /tmp/mqsc-output.log 2>&1
-rm /tmp/set-ssl.mqsc
-
-# Check if configuration was successful
-if grep -q "AMQ8005I" /tmp/mqsc-output.log && grep -q "AMQ8016I" /tmp/mqsc-output.log; then
-    print_status "SSL configured in Queue Manager and Channel"
-    rm /tmp/mqsc-output.log
-else
-    print_error "SSL configuration may have failed. Check logs."
-    cat /tmp/mqsc-output.log
-    rm /tmp/mqsc-output.log
-fi
-
-# Step 9: Restart Payara to reconnect with SSL
-print_info "Step 9: Restarting Payara..."
-docker-compose restart payara > /dev/null 2>&1
-print_status "Payara restarted"
-
-# Step 10: Wait for Payara to be ready
-print_info "Step 10: Waiting for Payara to be ready (30 seconds)..."
+# Step 7: Wait for Payara to be ready
+print_info "Step 7: Waiting for Payara to be ready (30 seconds)..."
 for i in {1..30}; do
     echo -n "."
     sleep 1
@@ -144,8 +100,8 @@ done
 echo ""
 print_status "Payara should be ready now"
 
-# Step 11: Send test messages with timestamps
-print_info "Step 11: Sending test messages to IBM MQ..."
+# Step 8: Send test messages with timestamps
+print_info "Step 8: Sending test messages to IBM MQ..."
 echo ""
 echo "========================================="
 echo "Sending Messages:"
@@ -174,11 +130,11 @@ print_status "All 5 messages sent successfully"
 echo ""
 
 # Wait for MDB to process
-print_info "Step 12: Waiting for MDB to process messages..."
+print_info "Step 9: Waiting for MDB to process messages..."
 sleep 5
 
-# Step 13: Check Payara logs for MDB processing
-print_info "Step 13: Verifying message processing..."
+# Step 10: Check Payara logs for MDB processing
+print_info "Step 10: Verifying message processing..."
 echo ""
 echo "========================================="
 echo "Messages Received by MDB:"

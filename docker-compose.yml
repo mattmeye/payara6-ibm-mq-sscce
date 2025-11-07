@@ -11,7 +11,13 @@ services:
       - "9444:9443"  # MQ Web Console (HTTPS)
     volumes:
       - ibm_mq_data:/mnt/mqm
-      - ./docker/certs:/mnt/certs:ro  # Mount certificates for SSL setup
+      # Mount MQ server certificate and private key using IBM MQ PKI structure
+      - ./docker/certs/mq/mq-server.crt:/etc/mqm/pki/keys/default/tls.crt:ro
+      - ./docker/certs/mq/mq-server.key:/etc/mqm/pki/keys/default/tls.key:ro
+      # Mount CA certificate as trusted certificate
+      - ./docker/certs/ca/ca.crt:/etc/mqm/pki/trust/0/ca.crt:ro
+      # Mount Payara client certificate as trusted (for mutual TLS)
+      - ./docker/certs/payara/payara-client.crt:/etc/mqm/pki/trust/1/payara-client.crt:ro
     environment:
       - MQ_QMGR_NAME=QM1
     healthcheck:
@@ -28,6 +34,7 @@ services:
     ports:
       - "8081:8080"  # Application HTTP
       - "4849:4848"  # Admin Console
+    entrypoint: ["/opt/payara/custom-entrypoint.sh"]
     environment:
       # IBM MQ Connection (SSL/TLS)
       MQ_HOST: ibm-mq
@@ -41,7 +48,8 @@ services:
     volumes:
       - ./build/libs/test-mdb.war:/tmp/test-mdb.war:ro
       - ./docker/payara/wmq.jakarta.jmsra.rar:/tmp/wmq.jakarta.jmsra.rar:ro
-      - ./docker/payara/domain.xml:/opt/payara/appserver/glassfish/domains/domain1/config/domain.xml
+      - ./docker/payara/domain.xml:/tmp/domain-template.xml:ro
+      - ./docker/payara/entrypoint.sh:/opt/payara/custom-entrypoint.sh:ro
       - ./docker/payara/post-boot-commands.asadmin:/opt/payara/config/post-boot-commands.asadmin:ro
       # Mount ALL certificates (ca, mq, payara)
       - ./docker/certs:/opt/payara/certs:ro

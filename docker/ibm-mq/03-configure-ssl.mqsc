@@ -1,11 +1,12 @@
 * IBM MQ SSL/TLS Configuration for Certificate-Based Authentication
 * This replaces username/password authentication with mutual TLS (mTLS)
 
-* Refresh SSL configuration to ensure latest keystores are loaded
-REFRESH SECURITY TYPE(SSL)
+* Set the certificate label to 'default' (matches the PKI directory name)
+* IBM MQ container will automatically load certificates from /etc/mqm/pki/keys/default/
+ALTER QMGR CERTLABL('default')
 
-* Alter Queue Manager to require SSL/TLS connections
-ALTER QMGR SSLKEYR('/var/mqm/qmgrs/QM1/ssl/mq-server')
+* Refresh SSL configuration to ensure latest certificates are loaded
+REFRESH SECURITY TYPE(SSL)
 
 * Delete old insecure channel (if exists)
 DELETE CHANNEL('DEV.APP.SVRCONN')
