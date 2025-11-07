@@ -25,6 +25,11 @@
   <monitoring-console-configuration></monitoring-console-configuration>
   <system-applications></system-applications>
   <resources>
+    <!-- ========================================== -->
+    <!-- SYSTEM RESOURCES (Payara Defaults)        -->
+    <!-- ========================================== -->
+
+    <!-- JDBC Resources -->
     <jdbc-resource pool-name="__TimerPool" object-type="system-all" jndi-name="jdbc/__TimerPool"></jdbc-resource>
     <jdbc-resource pool-name="H2Pool" object-type="system-all" jndi-name="jdbc/__default"></jdbc-resource>
     <jdbc-connection-pool datasource-classname="org.h2.jdbcx.JdbcDataSource" name="__TimerPool" res-type="javax.sql.XADataSource">
@@ -33,24 +38,58 @@
     <jdbc-connection-pool is-isolation-level-guaranteed="false" datasource-classname="org.h2.jdbcx.JdbcDataSource" name="H2Pool" res-type="javax.sql.DataSource">
       <property name="URL" value="jdbc:h2:${com.sun.aas.instanceRoot}/lib/databases/embedded_default;AUTO_SERVER=TRUE"></property>
     </jdbc-connection-pool>
+
+    <!-- Concurrent Resources -->
     <managed-executor-service object-type="system-all" jndi-name="concurrent/__defaultManagedExecutorService"></managed-executor-service>
     <managed-scheduled-executor-service object-type="system-all" jndi-name="concurrent/__defaultManagedScheduledExecutorService"></managed-scheduled-executor-service>
+
+    <!-- Default JMS Resources (Generic Payara JMS) -->
     <connector-connection-pool max-pool-size="250" resource-adapter-name="jmsra" steady-pool-size="1" name="jms/__defaultConnectionFactory-Connection-Pool" connection-definition-name="jakarta.jms.ConnectionFactory"></connector-connection-pool>
     <connector-resource pool-name="jms/__defaultConnectionFactory-Connection-Pool" object-type="system-all-req" jndi-name="jms/__defaultConnectionFactory"></connector-resource>
-    <connector-connection-pool resource-adapter-name="wmq.jakarta.jmsra" name="MQConnectionPool" connection-definition-name="jakarta.jms.ConnectionFactory">
-      <property name="hostName" value="ibm-mq"></property>
-      <property name="sslSocketFactory" value="com.example.mq.ssl.MQTruststoreSSLSocketFactory"></property>
-      <property name="queueManager" value="QM1"></property>
-      <property name="port" value="1414"></property>
-      <property name="channel" value="DEV.APP.SVRCONN"></property>
-      <property name="transportType" value="CLIENT"></property>
-      <property name="sslCipherSuite" value="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"></property>
+
+
+    <!-- ========================================== -->
+    <!-- IBM MQ CONFIGURATION (SSL/TLS)             -->
+    <!-- ========================================== -->
+
+    <!-- IBM MQ Connection Pool -->
+    <!-- External Resource Adapter: wmq.jakarta.jmsra -->
+    <!-- Connection: ibm-mq:1414 with SSL/TLS (Mutual TLS) -->
+    <connector-connection-pool
+        resource-adapter-name="wmq.jakarta.jmsra"
+        name="MQConnectionPool"
+        connection-definition-name="jakarta.jms.ConnectionFactory"
+        description="IBM MQ Connection Pool with SSL/TLS and Custom SSLSocketFactory">
+      <property name="hostName" value="ibm-mq" description="IBM MQ Server Hostname"></property>
+      <property name="port" value="1414" description="IBM MQ Listener Port (SSL/TLS)"></property>
+      <property name="queueManager" value="QM1" description="IBM MQ Queue Manager Name"></property>
+      <property name="channel" value="DEV.APP.SVRCONN" description="IBM MQ Server Connection Channel"></property>
+      <property name="transportType" value="CLIENT" description="MQ Transport Type"></property>
+      <property name="sslCipherSuite" value="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256" description="TLS Cipher Suite"></property>
+      <property name="sslSocketFactory" value="com.example.mq.ssl.MQTruststoreSSLSocketFactory" description="Custom SSL Socket Factory for Mutual TLS"></property>
     </connector-connection-pool>
-    <connector-resource pool-name="MQConnectionPool" jndi-name="jms/MQConnectionFactory"></connector-resource>
-    <admin-object-resource res-adapter="wmq.jakarta.jmsra" res-type="jakarta.jms.Queue" jndi-name="jms/DEV.QUEUE.1">
-      <property name="baseQueueName" value="DEV.QUEUE.1"></property>
-      <property name="baseQueueManagerName" value="QM1"></property>
+
+    <!-- IBM MQ Connection Factory -->
+    <!-- JNDI Name: jms/MQConnectionFactory -->
+    <connector-resource
+        pool-name="MQConnectionPool"
+        jndi-name="jms/MQConnectionFactory"
+        description="IBM MQ Connection Factory for SSL/TLS connections"></connector-resource>
+
+    <!-- IBM MQ Queue: DEV.QUEUE.1 -->
+    <!-- JNDI Name: jms/DEV.QUEUE.1 -->
+    <admin-object-resource
+        res-adapter="wmq.jakarta.jmsra"
+        res-type="jakarta.jms.Queue"
+        jndi-name="jms/DEV.QUEUE.1"
+        description="IBM MQ Test Queue">
+      <property name="baseQueueName" value="DEV.QUEUE.1" description="Physical queue name in IBM MQ"></property>
+      <property name="baseQueueManagerName" value="QM1" description="Queue Manager name"></property>
     </admin-object-resource>
+
+    <!-- ========================================== -->
+    <!-- END IBM MQ CONFIGURATION                   -->
+    <!-- ========================================== -->
   </resources>
   <servers>
     <server config-ref="server-config" name="server">
