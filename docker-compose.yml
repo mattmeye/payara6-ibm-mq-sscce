@@ -35,8 +35,8 @@ services:
       MQ_QMGR: QM1
       MQ_CHANNEL: DEV.APP.SVRCONN
       # IBM MQ Client Configuration with Custom SSLSocketFactory
-      # The custom factory reads truststore configuration from these properties
-      JAVA_TOOL_OPTIONS: "-Dcom.ibm.mq.cfg.useIBMCipherMappings=false -Dmq.ssl.trustStore=/opt/payara/certs/payara/payara-truststore.p12 -Dmq.ssl.trustStorePassword=payara -Dmq.ssl.trustStoreType=PKCS12"
+      # The custom factory reads truststore and keystore configuration from these properties
+      JAVA_TOOL_OPTIONS: "-Dcom.ibm.mq.cfg.useIBMCipherMappings=false -Dmq.ssl.trustStore=/opt/payara/certs/payara/payara-truststore.p12 -Dmq.ssl.trustStorePassword=payara -Dmq.ssl.trustStoreType=PKCS12 -Dmq.ssl.keyStore=/opt/payara/certs/payara/payara-client.p12 -Dmq.ssl.keyStorePassword=payara -Dmq.ssl.keyStoreType=PKCS12"
     volumes:
       - ./build/libs/test-mdb.war:/tmp/test-mdb.war:ro
       - ./docker/payara/wmq.jakarta.jmsra.rar:/tmp/wmq.jakarta.jmsra.rar:ro

@@ -27,21 +27,38 @@ public class MQTruststoreSSLSocketFactory extends SSLSocketFactory {
      * - mq.ssl.trustStore: Path to truststore file
      * - mq.ssl.trustStorePassword: Truststore password
      * - mq.ssl.trustStoreType: Truststore type (default: PKCS12)
+     * - mq.ssl.keyStore: Path to keystore file (for client certificate)
+     * - mq.ssl.keyStorePassword: Keystore password
+     * - mq.ssl.keyStoreType: Keystore type (default: PKCS12)
      */
     public MQTruststoreSSLSocketFactory() throws Exception {
+        // TrustStore configuration (for validating server certificate)
         String trustStorePath = System.getProperty("mq.ssl.trustStore",
                 "/opt/payara/certs/payara/payara-truststore.p12");
         String trustStorePassword = System.getProperty("mq.ssl.trustStorePassword", "payara");
         String trustStoreType = System.getProperty("mq.ssl.trustStoreType", "PKCS12");
 
+        // KeyStore configuration (for client certificate authentication)
+        String keyStorePath = System.getProperty("mq.ssl.keyStore",
+                "/opt/payara/certs/payara/payara-client.p12");
+        String keyStorePassword = System.getProperty("mq.ssl.keyStorePassword", "payara");
+        String keyStoreType = System.getProperty("mq.ssl.keyStoreType", "PKCS12");
+
         System.out.println("[MQTruststoreSSLSocketFactory] Initializing with:");
         System.out.println("  TrustStore: " + trustStorePath);
+        System.out.println("  KeyStore: " + keyStorePath);
         System.out.println("  Type: " + trustStoreType);
 
-        // Load truststore
+        // Load truststore (for validating server certificates)
         KeyStore trustStore = KeyStore.getInstance(trustStoreType);
         try (FileInputStream fis = new FileInputStream(trustStorePath)) {
             trustStore.load(fis, trustStorePassword.toCharArray());
+        }
+
+        // Load keystore (for client certificate)
+        KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+        try (FileInputStream fis = new FileInputStream(keyStorePath)) {
+            keyStore.load(fis, keyStorePassword.toCharArray());
         }
 
         // Initialize TrustManagerFactory
@@ -49,14 +66,19 @@ public class MQTruststoreSSLSocketFactory extends SSLSocketFactory {
                 TrustManagerFactory.getDefaultAlgorithm());
         tmf.init(trustStore);
 
-        // Initialize SSLContext with the TrustManagers
+        // Initialize KeyManagerFactory
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(
+                KeyManagerFactory.getDefaultAlgorithm());
+        kmf.init(keyStore, keyStorePassword.toCharArray());
+
+        // Initialize SSLContext with both KeyManagers and TrustManagers
         SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(null, tmf.getTrustManagers(), new SecureRandom());
+        sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
 
         // Get the delegate factory from the initialized context
         this.delegate = sslContext.getSocketFactory();
 
-        System.out.println("[MQTruststoreSSLSocketFactory] Successfully initialized");
+        System.out.println("[MQTruststoreSSLSocketFactory] Successfully initialized with client certificate");
     }
 
     // Delegate all SSLSocketFactory methods to the configured factory

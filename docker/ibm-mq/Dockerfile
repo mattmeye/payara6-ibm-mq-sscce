@@ -1,7 +1,7 @@
-# IBM MQ 9.4.3.1 Developer Image for ARM64 with SSL/TLS Support
+# IBM MQ 9.4.2.0 Developer Image for ARM64 with SSL/TLS Support
 # Built from https://github.com/ibm-messaging/mq-container
 
-FROM localhost/ibm-mqadvanced-server-dev:9.4.3.1-arm64
+FROM localhost/ibm-mqadvanced-server-dev:9.4.2.0-arm64
 
 # Accept IBM MQ License
 ENV LICENSE=accept

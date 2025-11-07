@@ -29,8 +29,8 @@ IBM MQ does not provide official ARM64 Docker images. You must build a custom im
    ```
 
    This command:
-   - Downloads IBM MQ Advanced for Developers 9.4.3.1 for ARM64
-   - Builds a Docker image tagged `ibm-mqadvanced-server-dev:9.4.3.1-arm64`
+   - Downloads IBM MQ Advanced for Developers 9.4.2.0 for ARM64
+   - Builds a Docker image tagged `ibm-mqadvanced-server-dev:9.4.2.0-arm64`
    - Takes approximately 5-10 minutes
 
 3. **Verify the Image**
@@ -41,7 +41,7 @@ IBM MQ does not provide official ARM64 Docker images. You must build a custom im
 
    Expected output:
    ```
-   ibm-mqadvanced-server-dev   9.4.3.1-arm64   <IMAGE_ID>   <TIME>   849MB
+   ibm-mqadvanced-server-dev   9.4.2.0-arm64   <IMAGE_ID>   <TIME>   849MB
    ```
 
 ### Using the ARM64 Image
@@ -49,7 +49,7 @@ IBM MQ does not provide official ARM64 Docker images. You must build a custom im
 The `Dockerfile` in this directory is pre-configured to use the ARM64 image:
 
 ```dockerfile
-FROM localhost/ibm-mqadvanced-server-dev:9.4.3.1-arm64
+FROM localhost/ibm-mqadvanced-server-dev:9.4.2.0-arm64
 ```
 
 **Important:** Use `DOCKER_BUILDKIT=0` when building with docker-compose due to image referencing issues:

@@ -168,7 +168,7 @@ docker exec ibm-mq bash -c "echo 'DISPLAY CHANNEL(DEV.APP.SVRCONN) SSLCIPH SSLCA
 - **Payara**: 6.2024.10-jdk21
 - **Jakarta EE**: 10
 - **IBM MQ**: 9.4.0.0-r1
-- **IBM MQ RAR**: 9.4.3.1 (Jakarta Messaging 3.1)
+- **IBM MQ RAR**: 9.4.2.0 (Jakarta Messaging 3.1)
 
 ## Troubleshooting
 
