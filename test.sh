@@ -111,7 +111,7 @@ print_info "Step 8: Configuring SSL in Queue Manager and Channel..."
 # Create MQSC script file
 cat > /tmp/set-ssl.mqsc << 'EOF'
 ALTER QMGR SSLKEYR('/var/mqm/qmgrs/QM1/ssl/mq-server')
-ALTER CHANNEL('DEV.APP.SVRCONN') CHLTYPE(SVRCONN) SSLCIPH('ECDHE_RSA_AES_128_GCM_SHA256') SSLCAUTH(OPTIONAL) MCAUSER('app')
+ALTER CHANNEL('DEV.APP.SVRCONN') CHLTYPE(SVRCONN) SSLCIPH('ECDHE_RSA_AES_128_GCM_SHA256') SSLCAUTH(REQUIRED) MCAUSER('app')
 REFRESH SECURITY TYPE(SSL)
 EOF
 
@@ -217,8 +217,9 @@ if [ "$message_count" -eq "$sent_count" ]; then
     echo ""
     echo "TLS Configuration:"
     echo "  ✓ Cipher Suite: ECDHE_RSA_AES_128_GCM_SHA256"
-    echo "  ✓ Client Certificate: Optional (SSLCAUTH=OPTIONAL)"
+    echo "  ✓ Mutual TLS (mTLS) with REQUIRED client certificate"
     echo "  ✓ Server Certificate: Validated via Truststore"
+    echo "  ✓ Client Certificate: Authenticated by MQ Server"
     echo ""
     print_info "Useful commands:"
     print_info "  - View Payara logs: docker logs payara"

@@ -11,11 +11,10 @@ ALTER QMGR SSLKEYR('/var/mqm/qmgrs/QM1/ssl/mq-server')
 DELETE CHANNEL('DEV.APP.SVRCONN')
 
 * Create SSL-enabled server connection channel
-* SSLCAUTH(OPTIONAL) = Client certificate optional (for testing)
+* SSLCAUTH(REQUIRED) = Client certificate mandatory (mutual TLS)
 * SSLCIPH = TLS 1.2 cipher with ECDHE key exchange
-* Once basic SSL works, change SSLCAUTH back to REQUIRED
 DEFINE CHANNEL('DEV.APP.SVRCONN') CHLTYPE(SVRCONN) +
-  SSLCAUTH(OPTIONAL) +
+  SSLCAUTH(REQUIRED) +
   SSLCIPH('ECDHE_RSA_AES_128_GCM_SHA256') +
   MCAUSER('app') +
   REPLACE

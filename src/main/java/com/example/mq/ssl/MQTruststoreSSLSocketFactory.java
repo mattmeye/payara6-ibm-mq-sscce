@@ -9,13 +9,15 @@ import java.security.KeyStore;
 import java.security.SecureRandom;
 
 /**
- * Custom SSLSocketFactory for IBM MQ connections that uses a specific truststore.
- * This allows IBM MQ client to validate server certificates without interfering
- * with Payara's internal SSL configuration.
+ * Custom SSLSocketFactory for IBM MQ connections that uses a specific truststore and keystore.
+ * This allows IBM MQ client to validate server certificates and provide client certificates
+ * without interfering with Payara's internal SSL configuration.
+ *
+ * This implementation provides mutual TLS (mTLS) with required client certificates.
  *
  * Configuration via IBM MQ connection factory properties:
  * - Set this class as the SSLSocketFactory implementation
- * - Truststore path and password configured via system properties or constructor
+ * - Truststore and keystore paths/passwords configured via system properties
  */
 public class MQTruststoreSSLSocketFactory extends SSLSocketFactory {
 
@@ -78,7 +80,7 @@ public class MQTruststoreSSLSocketFactory extends SSLSocketFactory {
         // Get the delegate factory from the initialized context
         this.delegate = sslContext.getSocketFactory();
 
-        System.out.println("[MQTruststoreSSLSocketFactory] Successfully initialized with client certificate");
+        System.out.println("[MQTruststoreSSLSocketFactory] Successfully initialized with mutual TLS (client certificate REQUIRED)");
     }
 
     // Delegate all SSLSocketFactory methods to the configured factory
