@@ -1,4 +1,4 @@
-package test;
+package com.example.mq.mdb;
 
 import jakarta.ejb.ActivationConfigProperty;
 import jakarta.ejb.MessageDriven;
@@ -9,11 +9,16 @@ import jakarta.jms.TextMessage;
 /**
  * Minimal MDB for SSCCE reproduction.
  *
- * Fixed: Added connectionFactoryLookup to use configured ConnectionFactory.
+ * Resource Adapter binding is now specified via @MessageDriven annotation's
+ * resourceAdapter property instead of ejb-jar.xml.
  */
 @MessageDriven(
     name = "TestMessageBean",
     activationConfig = {
+        @ActivationConfigProperty(
+            propertyName = "resourceAdapter",
+            propertyValue = "wmq.jakarta.jmsra"
+        ),
         @ActivationConfigProperty(
             propertyName = "destinationType",
             propertyValue = "jakarta.jms.Queue"

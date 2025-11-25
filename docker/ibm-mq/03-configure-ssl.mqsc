@@ -1,0 +1,45 @@
+* IBM MQ SSL/TLS Configuration for Certificate-Based Authentication
+* This replaces username/password authentication with mutual TLS (mTLS)
+
+* Set the certificate label to 'default' (matches the PKI directory name)
+* IBM MQ container will automatically load certificates from /etc/mqm/pki/keys/default/
+ALTER QMGR CERTLABL('default')
+
+* Refresh SSL configuration to ensure latest certificates are loaded
+REFRESH SECURITY TYPE(SSL)
+
+* Delete old insecure channel (if exists)
+DELETE CHANNEL('DEV.APP.SVRCONN')
+
+* Create SSL-enabled server connection channel
+* SSLCAUTH(REQUIRED) = Client certificate mandatory (mutual TLS)
+* SSLCIPH = TLS 1.2 cipher with ECDHE key exchange
+DEFINE CHANNEL('DEV.APP.SVRCONN') CHLTYPE(SVRCONN) +
+  SSLCAUTH(REQUIRED) +
+  SSLCIPH('ECDHE_RSA_AES_128_GCM_SHA256') +
+  MCAUSER('app') +
+  REPLACE
+
+* Enable channel authentication (was disabled in dev mode)
+ALTER QMGR CHLAUTH(ENABLED)
+
+* Block privileged users from client connections (security best practice)
+SET CHLAUTH('DEV.APP.SVRCONN') TYPE(BLOCKUSER) USERLIST('nobody','*MQADMIN')
+
+* Allow connections with valid certificates
+* Use DN (Distinguished Name) from client certificate for authorization
+SET CHLAUTH('DEV.APP.SVRCONN') TYPE(SSLPEERMAP) +
+  SSLPEER('CN=payara,OU=Development,O=SSCCE,L=BADHARZBURG,ST=NSA,C=DE') +
+  USERSRC(MAP) +
+  MCAUSER('app') +
+  ACTION(ADD)
+
+* Create application user 'app' and grant permissions
+* This user will be mapped from the client certificate
+SET AUTHREC OBJTYPE(QMGR) PRINCIPAL('app') AUTHADD(CONNECT,INQ)
+SET AUTHREC PROFILE('DEV.**') OBJTYPE(QUEUE) PRINCIPAL('app') AUTHADD(ALL)
+
+* Display SSL/TLS configuration
+DISPLAY QMGR SSLKEYR
+DISPLAY CHANNEL('DEV.APP.SVRCONN') ALL
+DISPLAY CHLAUTH('DEV.APP.SVRCONN') ALL
